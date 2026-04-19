@@ -1,4 +1,7 @@
-# domainrobot-python
+# Python Domainrobot (InternetX/AutoDNS) Library
+
+[![Documentation Status](https://app.readthedocs.org/projects/domainrobot-python/badge/?version=latest)](https://domainrobot-python.readthedocs.io/en/latest/)
+[![Coverage Status](https://coveralls.io/repos/github/DigitalTolk/domainrobot-python/badge.svg)](https://coveralls.io/github/DigitalTolk/domainrobot-python)
 
 Python client for the [Domainrobot JSON API](https://help.internetx.com/display/APIJSONEN/) (InterNetX/AutoDNS).
 
