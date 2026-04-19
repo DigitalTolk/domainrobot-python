@@ -5,6 +5,7 @@
 
 Python client for the [Domainrobot JSON API](https://help.internetx.com/display/APIJSONEN/) (InterNetX/AutoDNS).
 
+All responses return typed model objects with full IDE autocompletion.
 
 ## Installation
 
@@ -17,64 +18,75 @@ pip install domainrobot
 ```python
 from domainrobot import Domainrobot
 
-client = Domainrobot(
-    username="user",
-    password="pass",
-    context=4,
-)
+with Domainrobot(username="user", password="pass", context=4) as client:
+    # list all domains
+    result = client.domain.list()
+    for domain in result.data:
+        print(domain.name, domain.expire, domain.registryStatus)
+```
 
-# ping
-client.hello.ping()
+### Listing all domains
 
-# list domains
+`client.domain.list()` returns a response where each item in `data` is a
+[`Domain`](https://domainrobot-python.readthedocs.io/en/latest/api/models.html) model with these attributes:
+
+| Attribute | Type | Description |
+|---|---|---|
+| `name` | `str` | Domain name, e.g. `"example.com"` |
+| `idn` | `str` | Unicode version (punycode) |
+| `expire` | `str` | Expiration date |
+| `payable` | `str` | Next payable date |
+| `registryStatus` | `str` | `"ACTIVE"`, `"HOLD"`, `"LOCK"`, etc. |
+| `autoRenewStatus` | `str` | `"TRUE"`, `"FALSE"`, `"ONCE"` |
+| `dnssec` | `bool` | DNSSEC enabled |
+| `privacy` | `bool` | Privacy service enabled |
+| `trustee` | `bool` | Trustee service enabled |
+| `domainsafe` | `bool` | DomainSafe enabled |
+| `ownerc` | `dict` | Owner contact |
+| `adminc` | `dict` | Admin contact |
+| `techc` | `dict` | Technical contact |
+| `nameServers` | `list[dict]` | Name servers |
+| `comment` | `str` | Custom comment field |
+| `created` | `str` | Creation date |
+| `updated` | `str` | Last update date |
+| `extra` | `dict` | Any unknown/new API fields |
+
+```python
 result = client.domain.list(
     {"filters": [{"key": "name", "value": "*.com", "operator": "LIKE"}]},
     keys=["status", "expire"],
 )
 for domain in result.data:
-    print(domain["name"])
-
-client.close()
+    print(f"{domain.name}  expires={domain.expire}  status={domain.registryStatus}")
 ```
 
-### Context manager
+### Domain operations
 
 ```python
-with Domainrobot(username="user", password="pass", context=4) as client:
-    result = client.domain.info("example.com")
-    print(result.data)
-```
-
-## Common examples
-
-### Domain
-
-```python
-# register
-client.domain.create({
+# register (async - returns Job)
+job_result = client.domain.create({
     "name": "example.com",
     "ownerc": {"id": 1},
     "adminc": {"id": 1},
     "techc": {"id": 1},
 })
+print(job_result.data[0].status)  # "RUNNING"
+
+# get info (returns Domain)
+result = client.domain.info("example.com")
+print(result.data[0].authinfo)
 
 # transfer
-client.domain.transfer({
-    "name": "example.com",
-    "authinfo": "secret",
-})
+client.domain.transfer({"name": "example.com", "authinfo": "secret"})
 
-# create cancelation
-client.domain.cancelation_create("example.com", {
-    "type": "DELETE",
-    "execution": "EXPIRE",
-})
+# cancelation
+client.domain.cancelation_create("example.com", {"type": "DELETE", "execution": "EXPIRE"})
 ```
 
 ### Contact
 
 ```python
-# create
+# create (returns Contact)
 result = client.contact.create({
     "type": "PERSON",
     "fname": "John",
@@ -86,48 +98,53 @@ result = client.contact.create({
     "address": ["Marienplatz 1"],
     "phone": "+49-89-12345",
 })
-contact_id = result.data[0]["id"]
+print(result.data[0].id)  # contact ID
 
 # update
-client.contact.update(contact_id, {"fname": "Jane"})
+client.contact.update(result.data[0].id, {"fname": "Jane"})
 ```
 
 ### Certificate
 
 ```python
-# prepare order (check CSR)
-client.certificate.prepare_order({"plain": "-----BEGIN CERTIFICATE REQUEST-----\n..."})
+# prepare order (returns CertificateData)
+prep = client.certificate.prepare_order({"plain": "-----BEGIN CERTIFICATE REQUEST-----\n..."})
 
-# order
+# order (async - returns Job)
 client.certificate.create({
     "product": "BASIC_SSL",
     "csr": "-----BEGIN CERTIFICATE REQUEST-----\n...",
     "adminContact": {"id": 1},
     "technicalContact": {"id": 1},
 })
+
+# get info (returns Certificate)
+result = client.certificate.info(456)
+print(result.data[0].serialNumber)
 ```
 
 ### Zone
 
 ```python
-# create
+# create (returns Zone)
 client.zone.create({
     "origin": "example.com",
     "soa": {"email": "admin@example.com", "refresh": 43200, "retry": 7200, "expire": 1209600, "ttl": 86400},
     "main": {"address": "1.2.3.4"},
 })
 
-# stream update (add/remove records)
-client.zone.stream("example.com", {
+# stream update - add/remove records (returns Zone)
+result = client.zone.stream("example.com", {
     "adds": [{"name": "www", "type": "A", "value": "1.2.3.4", "ttl": 3600}],
     "rems": [],
 })
+print(result.data[0].resourceRecords)
 ```
 
 ### Error handling
 
 ```python
-from domainrobot import Domainrobot, DomainrobotApiError, DomainrobotTransportError
+from domainrobot import DomainrobotApiError, DomainrobotTransportError
 
 try:
     client.domain.info("nonexistent.example")
@@ -148,25 +165,29 @@ client.domain.info("example.com", headers={"X-Domainrobot-Demo": "true"})
 
 ## Available services
 
-| Service | Attribute | Key endpoints |
-|---|---|---|
-| Account | `client.account` | info, update |
-| BackupMx | `client.backup_mx` | create, info, delete, list |
-| Certificate | `client.certificate` | create, info, reissue, delete, renew, revoke, list |
-| Contact | `client.contact` | create, info, update, delete, list |
-| Domain | `client.domain` | create, info, update, list, transfer, renew, restore |
-| DomainStudio | `client.domain_studio` | search |
-| Hello | `client.hello` | ping |
-| Job | `client.job` | info, list, cancel, confirm |
-| MailProxy | `client.mail_proxy` | create, info, update, delete, list |
-| Poll | `client.poll` | info, confirm |
-| Redirect | `client.redirect` | create, info, update, delete, list |
-| Session | `client.session` | login, logout |
-| SslContact | `client.ssl_contact` | create, info, update, delete, list |
-| Subscription | `client.subscription` | create, update, delete, list |
-| TransferOut | `client.transfer_out` | list, answer |
-| User | `client.user` | create, info, update, delete, list |
-| Zone | `client.zone` | create, info, update, delete, list, stream, import_zone |
+| Service | Attribute | Response model | Key endpoints |
+|---|---|---|---|
+| Account | `client.account` | `Account` | info, update |
+| BackupMx | `client.backup_mx` | `BackupMx` | create, info, delete, list |
+| Certificate | `client.certificate` | `Certificate` / `Job` | create, info, reissue, delete, renew, revoke, list |
+| Contact | `client.contact` | `Contact` | create, info, update, delete, list |
+| Domain | `client.domain` | `Domain` / `Job` | create, info, update, list, transfer, renew, restore |
+| DomainStudio | `client.domain_studio` | `DomainEnvelope` | search |
+| Hello | `client.hello` | - | ping |
+| Job | `client.job` | `ObjectJob` | info, list, cancel, confirm |
+| MailProxy | `client.mail_proxy` | `MailProxy` | create, info, update, delete, list |
+| Poll | `client.poll` | `PollMessage` | info, confirm |
+| Redirect | `client.redirect` | `Redirect` | create, info, update, delete, list |
+| Session | `client.session` | `User` | login, logout |
+| SslContact | `client.ssl_contact` | `SslContact` | create, info, update, delete, list |
+| Subscription | `client.subscription` | `Subscription` | create, update, delete, list |
+| TransferOut | `client.transfer_out` | `TransferOut` | list, answer |
+| User | `client.user` | `User` | create, info, update, delete, list |
+| Zone | `client.zone` | `Zone` | create, info, update, delete, list, stream, import_zone |
+
+## Documentation
+
+Full API reference: [domainrobot-python.readthedocs.io](https://domainrobot-python.readthedocs.io/en/latest/)
 
 ## License
 

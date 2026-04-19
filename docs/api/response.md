@@ -1,6 +1,7 @@
 # Response
 
-```{automodule} domainrobot.response
-:members:
-:undoc-members:
+```{eval-rst}
+.. automodule:: domainrobot.response
+   :members:
+   :undoc-members:
 ```

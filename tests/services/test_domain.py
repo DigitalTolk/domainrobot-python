@@ -18,7 +18,7 @@ class TestDomainService:
         )
         result = client.domain.info("example.com")
         assert result.status_code == 200
-        assert result.data == [{"name": "example.com"}]
+        assert result.data[0].name == "example.com"
         assert route.called
 
     def test_update(self, client, mock_api):

@@ -8,6 +8,7 @@ from importlib.metadata import version
 
 from .exceptions import DomainrobotApiError, DomainrobotTransportError
 from .headers import HEADER_CONTEXT
+from .models._base import Model
 from .response import DomainrobotResponse
 
 _VERSION = version("domainrobot")
@@ -50,6 +51,7 @@ class HttpClient:
         json: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        model: type[Model] | None = None,
     ) -> DomainrobotResponse:
         try:
             resp = self._client.request(
@@ -69,6 +71,7 @@ class HttpClient:
                 status_code=resp.status_code,
                 body=body,
                 headers=dict(resp.headers),
+                model=model,
             )
 
         raise DomainrobotApiError(

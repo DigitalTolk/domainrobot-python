@@ -1,6 +1,7 @@
 # Client
 
-```{automodule} domainrobot.client
-:members:
-:undoc-members:
+```{eval-rst}
+.. automodule:: domainrobot.client
+   :members:
+   :undoc-members:
 ```

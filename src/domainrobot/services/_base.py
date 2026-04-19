@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .._http import HttpClient
+    from ..models._base import Model
     from ..response import DomainrobotResponse
 
 
@@ -21,9 +22,10 @@ class BaseService:
         json: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        model: type[Model] | None = None,
     ) -> DomainrobotResponse:
         return self._http.request(
-            method, path, json=json, params=params, headers=headers
+            method, path, json=json, params=params, headers=headers, model=model
         )
 
     @staticmethod
