@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import datetime
 import types
-import typing
 from typing import Any, TypeVar, Union, get_type_hints
 
 T = TypeVar("T", bound="Model")
