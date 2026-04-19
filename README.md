@@ -5,8 +5,6 @@
 
 Python client for the [Domainrobot JSON API](https://help.internetx.com/display/APIJSONEN/) (InterNetX/AutoDNS).
 
-All responses return typed model objects with full IDE autocompletion.
-
 ## Installation
 
 ```bash
@@ -32,23 +30,23 @@ with Domainrobot(username="user", password="pass", context=4) as client:
 
 | Attribute | Type | Description |
 |---|---|---|
-| `name` | `str` | Domain name, e.g. `"example.com"` |
-| `idn` | `str` | Unicode version (punycode) |
-| `expire` | `str` | Expiration date |
-| `payable` | `str` | Next payable date |
-| `registryStatus` | `str` | `"ACTIVE"`, `"HOLD"`, `"LOCK"`, etc. |
-| `autoRenewStatus` | `str` | `"TRUE"`, `"FALSE"`, `"ONCE"` |
-| `dnssec` | `bool` | DNSSEC enabled |
-| `privacy` | `bool` | Privacy service enabled |
-| `trustee` | `bool` | Trustee service enabled |
-| `domainsafe` | `bool` | DomainSafe enabled |
-| `ownerc` | `dict` | Owner contact |
-| `adminc` | `dict` | Admin contact |
-| `techc` | `dict` | Technical contact |
-| `nameServers` | `list[dict]` | Name servers |
-| `comment` | `str` | Custom comment field |
-| `created` | `str` | Creation date |
-| `updated` | `str` | Last update date |
+| `name` | `str` | The name of the domain. |
+| `idn` | `str` | The unicode domain name |
+| `expire` | `datetime` | The expire date of the domain. |
+| `payable` | `datetime` | The payable date of the domain. |
+| `registryStatus` | `str` | The registry status. |
+| `autoRenewStatus` | `str` | The autorenew status. |
+| `dnssec` | `bool` | Indicates whether DNSSEC is enabled for the domain or not. |
+| `privacy` | `bool` | Enable privacy service for the domain. |
+| `trustee` | `bool` | Enable trustee service for the domain. |
+| `domainsafe` | `bool` | Enable domainsafe. |
+| `ownerc` | `dict` | The owner contact. |
+| `adminc` | `dict` | The administrative contact. |
+| `techc` | `dict` | The technical contact reference. |
+| `nameServers` | `list[dict]` | The nameservers. |
+| `comment` | `str` | A custom field. Can only be updated via PUT /domain/{name}/_comment. Requires appropriate ACLs. |
+| `created` | `datetime` | Date of creation. |
+| `updated` | `datetime` | Date of the last update. |
 | `extra` | `dict` | Any unknown/new API fields |
 
 ```python

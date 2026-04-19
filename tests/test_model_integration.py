@@ -6,12 +6,8 @@ from domainrobot.models import (
     Certificate,
     Contact,
     Domain,
-    DomainCancelation,
     Job,
     ObjectJob,
-    PollMessage,
-    SslContact,
-    User,
     Zone,
 )
 from tests.conftest import SUCCESSFUL_RESPONSE
@@ -116,6 +112,7 @@ class TestZoneModels:
         zone = result.data[0]
         assert isinstance(zone, Zone)
         assert zone.origin == "example.com"
+        assert zone.resourceRecords is not None
         assert len(zone.resourceRecords) == 1
 
 
@@ -133,6 +130,7 @@ class TestJobModels:
         result = client.job.info(1)
         oj = result.data[0]
         assert isinstance(oj, ObjectJob)
+        assert oj.job is not None
         assert oj.job["status"] == "SUCCESS"
 
 

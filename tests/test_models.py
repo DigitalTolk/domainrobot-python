@@ -1,3 +1,5 @@
+import datetime
+
 from domainrobot.models import (
     Account,
     BackupMx,
@@ -137,7 +139,64 @@ class TestAllModelsFromDict:
             "resourceRecords": [{"name": "www", "type": "A", "value": "1.2.3.4"}],
         })
         assert z.origin == "example.com"
+        assert z.resourceRecords is not None
         assert len(z.resourceRecords) == 1
+
+
+class TestDatetimeParsing:
+    def test_iso_datetime_with_timezone(self):
+        d = Domain.from_dict({"created": "2024-01-15T10:30:00.000+0000"})
+        assert isinstance(d.created, datetime.datetime)
+        assert d.created.year == 2024
+        assert d.created.month == 1
+        assert d.created.day == 15
+
+    def test_iso_datetime_without_millis(self):
+        d = Domain.from_dict({"expire": "2026-06-15T00:00:00+0000"})
+        assert isinstance(d.expire, datetime.datetime)
+        assert d.expire.year == 2026
+
+    def test_iso_datetime_without_timezone(self):
+        d = Domain.from_dict({"updated": "2024-06-15T12:00:00"})
+        assert isinstance(d.updated, datetime.datetime)
+        assert d.updated.hour == 12
+
+    def test_none_stays_none(self):
+        d = Domain.from_dict({"expire": None})
+        assert d.expire is None
+
+    def test_missing_stays_none(self):
+        d = Domain.from_dict({})
+        assert d.created is None
+
+    def test_non_datetime_fields_unaffected(self):
+        d = Domain.from_dict({"name": "example.com", "dnssec": True})
+        assert d.name == "example.com"
+        assert d.dnssec is True
+
+    def test_multiple_datetime_fields(self):
+        d = Domain.from_dict({
+            "created": "2024-01-01T00:00:00.000+0000",
+            "updated": "2024-06-15T00:00:00.000+0000",
+            "expire": "2026-01-01T00:00:00.000+0000",
+            "domainCreated": "2024-01-01T00:00:00.000+0000",
+        })
+        assert isinstance(d.created, datetime.datetime)
+        assert isinstance(d.updated, datetime.datetime)
+        assert isinstance(d.expire, datetime.datetime)
+        assert isinstance(d.domainCreated, datetime.datetime)
+
+    def test_transfer_out_dates(self):
+        t = TransferOut.from_dict({
+            "start": "2024-06-01T00:00:00.000+0000",
+            "end": "2024-06-10T00:00:00.000+0000",
+        })
+        assert isinstance(t.start, datetime.datetime)
+        assert isinstance(t.end, datetime.datetime)
+
+    def test_job_execution_datetime(self):
+        j = Job.from_dict({"execution": "2024-01-01T00:00:01.000+0000"})
+        assert isinstance(j.execution, datetime.datetime)
 
 
 class TestModelInheritance:
