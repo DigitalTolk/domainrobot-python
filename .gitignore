@@ -14,5 +14,6 @@ __pycache__/
 .pytest_cache/
 
 /.coverage
+/coverage.lcov
 /reference/
 /docs/_build/

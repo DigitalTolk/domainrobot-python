@@ -4,7 +4,7 @@ install:
 	pip install -e ".[dev]"
 
 test:
-	python -m pytest tests/ -v --cov=loopiase --cov-report=term-missing --cov-report=lcov
+	python -m pytest tests/ -v --cov=domainrobot --cov-report=term-missing --cov-report=lcov
 
 lint:
 	python -m pyright src/ tests/
