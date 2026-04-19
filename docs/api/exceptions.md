@@ -1,7 +1,8 @@
 # Exceptions
 
-```{automodule} domainrobot.exceptions
-:members:
-:undoc-members:
-:show-inheritance:
+```{eval-rst}
+.. automodule:: domainrobot.exceptions
+   :members:
+   :undoc-members:
+   :show-inheritance:
 ```

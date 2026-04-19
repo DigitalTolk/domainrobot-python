@@ -9,6 +9,7 @@ Python client for the [Domainrobot JSON API](https://help.internetx.com/display/
 quickstart
 api/client
 api/services
+api/models
 api/response
 api/exceptions
 ```
