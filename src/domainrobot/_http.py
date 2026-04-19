@@ -4,10 +4,13 @@ from typing import Any
 
 import httpx
 
+from importlib.metadata import version
+
 from .exceptions import DomainrobotApiError, DomainrobotTransportError
+from .headers import HEADER_CONTEXT
 from .response import DomainrobotResponse
 
-_VERSION = "0.1.0"
+_VERSION = version("domainrobot")
 
 
 class HttpClient:
@@ -28,7 +31,7 @@ class HttpClient:
             "Content-Type": "application/json",
         }
         if context is not None:
-            headers["X-Domainrobot-Context"] = str(context)
+            headers[HEADER_CONTEXT] = str(context)
         if default_headers:
             headers.update(default_headers)
 
