@@ -10,8 +10,7 @@ from domainrobot.services.ssl_contact import SslContactService
 from domainrobot.services.transfer_out import TransferOutService
 from domainrobot.services.user import UserService
 from domainrobot.services.zone import ZoneService
-
-BASE_URL = "https://api.autodns.com/v1"
+from tests.conftest import BASE_URL
 
 
 class TestDomainrobotInit:
